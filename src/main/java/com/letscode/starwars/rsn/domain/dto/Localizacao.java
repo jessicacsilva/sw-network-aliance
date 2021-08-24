@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+
 @Data
 @Entity
 public class Localizacao {
@@ -13,4 +14,8 @@ public class Localizacao {
     private Long latitude;
     private Long longitude;
     private String nome;
+
+
+    @OneToOne(mappedBy = "localizacao")
+    private Rebelde rebelde;
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,36 +93,36 @@ public class RebeldeService {
 
         long total = rebelde.stream().count();
 
-        long totalTraiores = rebelde.stream().filter(t->t.getETraidor().equals(true)).count();
+        Optional<Rebelde> totalTraiores = rebelde.stream().filter(t->t.getETraidor().equals(true)).findAny();
 
-        return  Double.valueOf(totalTraiores * 100/total);
+        return  Double.valueOf(totalTraiores.stream().count() * 100/total);
 
     }
 
     public Double getRebeldes(){
-        List<Rebelde> rebelde = rebeldeRepository.findAll();
+        Double totalRebeldes = 100 -  getTraidores();
 
-        long total = rebelde.stream().count();
-
-        long totalTraiores = rebelde.stream().filter(t->t.getETraidor().equals(false)).count();
-
-        return Double.valueOf(totalTraiores * 100/total);
+        return totalRebeldes;
     }
 
     public List<RecursoResponse> getMediaRecursos(){
         List<Rebelde> rebeldes = rebeldeRepository.findAll();
         List<RecursoResponse> recursoResponses = new ArrayList<>();
+        Long contador = 0l;
 
         for (Rebelde rebelde:rebeldes) {
-            ARMA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.ARMA)).count();
-            MUNICAO += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.MUNICAO)).count();
-            AGUA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.AGUA)).count();
-            COMIDA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.COMIDA)).count();
+            if(!rebelde.getETraidor()){
+                ARMA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.ARMA)).count();
+                MUNICAO += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.MUNICAO)).count();
+                AGUA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.AGUA)).count();
+                COMIDA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.COMIDA)).count();
+                contador++;
+            }
         }
-        recursoResponses.add( new RecursoResponse(EnumRecursos.ARMA, ARMA/rebeldes.stream().count()));
-        recursoResponses.add( new RecursoResponse(EnumRecursos.MUNICAO, MUNICAO/rebeldes.stream().count()));
-        recursoResponses.add( new RecursoResponse(EnumRecursos.AGUA, AGUA/rebeldes.stream().count()));
-        recursoResponses.add( new RecursoResponse(EnumRecursos.COMIDA, COMIDA/rebeldes.stream().count()));
+        recursoResponses.add( new RecursoResponse(EnumRecursos.ARMA, ARMA/contador));
+        recursoResponses.add( new RecursoResponse(EnumRecursos.MUNICAO, MUNICAO/contador));
+        recursoResponses.add( new RecursoResponse(EnumRecursos.AGUA, AGUA/contador));
+        recursoResponses.add( new RecursoResponse(EnumRecursos.COMIDA, COMIDA/contador));
 
 
         return recursoResponses;

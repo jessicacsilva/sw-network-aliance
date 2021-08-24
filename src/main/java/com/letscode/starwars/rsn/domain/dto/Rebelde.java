@@ -14,10 +14,9 @@ public class Rebelde {
     private String nome;
     private Integer idade;
     private String genero;
-    private Boolean eTraidor;
-    private Integer contadorNotificacao;
+    private Boolean eTraidor = false;
+    private Integer contadorNotificacao = 0;
 
-    @Transient
     @OneToOne
     private Localizacao localizacao;
 

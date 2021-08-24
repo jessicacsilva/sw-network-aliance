@@ -48,28 +48,4 @@ public class RebeldeController {
                                            @RequestBody List<RecursoRequest> recursosRebelde2) {
        return rebeldeService.negociarRecursos(idRebelde,idRebelde2,recursosRebelde1,recursosRebelde2);
     }
-
-    @GetMapping("/traidores")
-    @Operation(description = "Retornar percentual traidores")
-    public Double getTraiores(){
-        return rebeldeService.getTraidores();
-    }
-
-    @GetMapping("/rebeldes")
-    @Operation(description = "Retornar percentual rebeldes")
-    public Double getRebeldes(){
-        return rebeldeService.getRebeldes();
-    }
-
-    @GetMapping("/recursos/media")
-    @Operation(description = "Retornar média recursos")
-    public List<RecursoResponse> getMediaRecursos(){
-        return rebeldeService.getMediaRecursos();
-    }
-
-    @GetMapping("/pontosPerdidos")
-    @Operation(description = "Retornar pontos perdidos")
-    public Long getPontosPerdidos(){
-        return rebeldeService.getPontosPerdidos();
-    }
 }

@@ -6,9 +6,10 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-@Builder
+
 @Data
 @Entity
+@Builder
 public class Recurso {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

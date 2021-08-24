@@ -1,10 +1,10 @@
 package com.letscode.starwars.rsn.model;
 
 public enum EnumRecursos {
-    ARMA("Arma",4),
-    MUNICAO("Munição",3),
-    AGUA("Água",2),
-    COMIDA("Comida",1);
+    ARMA("ARMA",4),
+    MUNICAO("MUNICAO",3),
+    AGUA("AGUA",2),
+    COMIDA("COMIDA",1);
 
     EnumRecursos(String nome, Integer pontos) {
         this.nome = nome;
