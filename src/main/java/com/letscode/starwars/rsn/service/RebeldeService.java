@@ -34,7 +34,7 @@ public class RebeldeService {
         this.recursoRepository = recursoRepository;
     }
 
-    public void cadastrarRebelde(RebeldeRequest request){
+    public ResponseEntity cadastrarRebelde(RebeldeRequest request){
 
         Rebelde rebelde = rebeldeRepository.save(
                 RebeldeRequest.mapRebelde(request,
@@ -43,45 +43,57 @@ public class RebeldeService {
 
         atualizarRecursos(rebelde.getId(),request.getRecurso());
 
+        return ResponseEntity.status(HttpStatus.OK).body("Rebelde cadastrado com sucesso!");
+
     }
 
-    public void atualizarLocalizacao(LocalizacaoRequest localizacaoRequest, Long id){
+    public ResponseEntity atualizarLocalizacao(LocalizacaoRequest localizacaoRequest, Long id){
         Rebelde rebelde = rebeldeRepository.getById(id);
 
-        Localizacao localizacao = localizacaoRepository.getById(rebelde.getLocalizacao().getId());
-        localizacao.setNome(localizacaoRequest.getNome());
-        localizacao.setLongitude(localizacaoRequest.getLongitude());
-        localizacao.setLatitude(localizacaoRequest.getLatitude());
-
+        Localizacao localizacao = LocalizacaoRequest.mapLocalizacao(localizacaoRequest);
+        localizacao.setId(rebelde.getLocalizacao().getId());
         localizacaoRepository.save(localizacao);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Rebelde cadastrado com sucesso!");
     }
 
-    public  void reportarTraidor(Long id){
+    public  ResponseEntity reportarTraidor(Long id){
         Rebelde rebelde = rebeldeRepository.getById(id);
         Integer contador = rebelde.getContadorNotificacao();
+
         if( contador >=  3){
             rebelde.setETraidor(true);
+        }else{
+            contador += 1;
         }
 
-        rebelde.setContadorNotificacao(contador++);
+        rebelde.setContadorNotificacao(contador);
 
         rebeldeRepository.save(rebelde);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Notificação realizada com sucesso!");
     }
 
     public ResponseEntity negociarRecursos(Long idRebelde1,
                                            Long idRebelde2,
-                                           List<RecursoRequest> recursosRebelde1,
-                                           List<RecursoRequest> recursosRebelde2) {
+                                           List<List<RecursoRequest>> recursosRebelde) {
 
-        if ( verificaTraidor(idRebelde1) || verificaTraidor(idRebelde2)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Foi detectado um traidor!");
+        /*Lógica pensanda na situação que a troca sempre será realiza entre dois rebeldes por vez*/
+        try{
+            if ( verificaTraidor(idRebelde1) || verificaTraidor(idRebelde2)){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Foi detectado um traidor!");
+            }
+        }catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Algum dos rebeldes não foi encontrado!");
         }
-        Integer somaRecursosRebelde1 = recursosRebelde1.stream().map(r1 -> r1.getQuantidade() * (EnumRecursos.getPontos(r1.getTipoRecurso().name()))).mapToInt(Integer::intValue).sum();
-        Integer somaRecursosRebelde2 = recursosRebelde2.stream().map(r1 -> r1.getQuantidade() * (EnumRecursos.getPontos(r1.getTipoRecurso().name()))).mapToInt(Integer::intValue).sum();
+
+
+        Integer somaRecursosRebelde1 = recursosRebelde.get(0).stream().map(r1 -> r1.getQuantidade() * (EnumRecursos.getPontos(r1.getTipoRecurso().name()))).mapToInt(Integer::intValue).sum();
+        Integer somaRecursosRebelde2 = recursosRebelde.get(1).stream().map(r1 -> r1.getQuantidade() * (EnumRecursos.getPontos(r1.getTipoRecurso().name()))).mapToInt(Integer::intValue).sum();
 
         if(somaRecursosRebelde1==somaRecursosRebelde2){
-            atualizarRecursos(idRebelde1,recursosRebelde2);
-            atualizarRecursos(idRebelde2,recursosRebelde1);
+            atualizarRecursos(idRebelde1,recursosRebelde.get(1));
+            atualizarRecursos(idRebelde2,recursosRebelde.get(0));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body("");
@@ -110,6 +122,7 @@ public class RebeldeService {
         List<RecursoResponse> recursoResponses = new ArrayList<>();
         Long contador = 0l;
 
+        /*Lógica pensada nos tipos de recursos fixos que foram descritos no desafio*/
         for (Rebelde rebelde:rebeldes) {
             if(!rebelde.getETraidor()){
                 ARMA += rebelde.getRecurso().stream().filter(r->r.getTipoRecurso().equals(EnumRecursos.ARMA)).count();
@@ -131,9 +144,7 @@ public class RebeldeService {
     public Long getPontosPerdidos(){
         List<Rebelde> rebelde = rebeldeRepository.findAll();
         Long pontosPerdidos = 0l;
-
-        long total = rebelde.stream().count();
-
+        
         List<Rebelde> traidores = rebelde.stream().filter(t->t.getETraidor().equals(true)).collect(Collectors.toList());
 
         for (Rebelde traidor:traidores) {

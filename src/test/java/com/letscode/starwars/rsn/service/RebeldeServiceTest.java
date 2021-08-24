@@ -92,6 +92,8 @@ public class RebeldeServiceTest {
     public void deveRetornarErroAoNegociarRecursosComTraidor() {
         Long idRebelde  = 1l;
         Long idRebelde2 =3l;
+
+        List<List<RecursoRequest>> listasRecursos = new ArrayList<>();
         List<RecursoRequest> recursosRebelde1 = new ArrayList<>();
         RecursoRequest recursoRequest = new RecursoRequest();
         recursoRequest.setTipoRecurso(EnumRecursos.ARMA);
@@ -101,12 +103,15 @@ public class RebeldeServiceTest {
         List<RecursoRequest> recursosRebelde2 = new ArrayList<>();
         recursosRebelde2.add(recursoRequest);
 
+        listasRecursos.add(recursosRebelde1);
+        listasRecursos.add(recursosRebelde2);
+
         ResponseEntity returnMock = ResponseEntity.status(HttpStatus.FORBIDDEN).body("Foi detectado um traidor!");
 
         when(rebeldeRepositoryMock.getById(1l)).thenReturn(rebeldeMock);
         when(rebeldeRepositoryMock.getById(3l)).thenReturn(rebeldeMock2);
 
-        ResponseEntity responseEntity =  rebeldeService.negociarRecursos(idRebelde,idRebelde2,recursosRebelde1,recursosRebelde2);
+        ResponseEntity responseEntity =  rebeldeService.negociarRecursos(idRebelde,idRebelde2,listasRecursos);
 
         assertEquals(returnMock,responseEntity);
     }
@@ -117,6 +122,7 @@ public class RebeldeServiceTest {
     public void deveRetornarErroAoNegociarRecursos() {
         Long idRebelde  = 4l;
         Long idRebelde2 =3l;
+        List<List<RecursoRequest>> listasRecursos = new ArrayList<>();
         List<RecursoRequest> recursosRebelde1 = new ArrayList<>();
         RecursoRequest recursoRequest = new RecursoRequest();
         recursoRequest.setTipoRecurso(EnumRecursos.ARMA);
@@ -126,12 +132,15 @@ public class RebeldeServiceTest {
         List<RecursoRequest> recursosRebelde2 = new ArrayList<>();
         recursosRebelde2.add(recursoRequest);
 
+        listasRecursos.add(recursosRebelde1);
+        listasRecursos.add(recursosRebelde2);
+
         ResponseEntity returnMock = ResponseEntity.status(HttpStatus.OK).body("");
 
         when(rebeldeRepositoryMock.getById(4l)).thenReturn(rebeldeMock3);
         when(rebeldeRepositoryMock.getById(3l)).thenReturn(rebeldeMock2);
 
-        ResponseEntity responseEntity =  rebeldeService.negociarRecursos(idRebelde,idRebelde2,recursosRebelde1,recursosRebelde2);
+        ResponseEntity responseEntity =  rebeldeService.negociarRecursos(idRebelde,idRebelde2,listasRecursos);
 
         assertEquals(returnMock,responseEntity);
     }
